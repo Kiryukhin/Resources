@@ -1,0 +1,36 @@
+\subsection{Notation}
+I define the basic notation throughout this document in the following lines. I do not assume that, in general, all the measures or all the factors or all the individuals are considered. That is a particular case when $n= N, f=F, v=V$ in some of the equations below, which are straightforward to recognize.\footnote{To ease matrix calculation and interpretation I use a subindex to indicate the dimensions of each matrix.}
+\begin{enumerate}
+\item Measures matrix (in deviation): \\
+\noindent The data matrix containing $v$ measures for $n$ individuals \textit{in deviations from the mean} is $X_{nv}$ .
+\item Measures matrix (standardized): \\
+\noindent The data matrix containing $v$ measures for $n$ individuals \textit{in standardized form} is $Z_{nv}$.
+\item Factor score matrix (standardized): \\
+\noindent The factor score matrix containing $f$ common factor scores for $n$ individuals \textit{in standardized form} is $F_{nf}$.
+\item Factor loadings matrix:\\
+\noindent The factor loadings matrix containing the $v$ weights for $f$ factors ``to recover measures from factor scores'' (in a full components model in the absence of measurement error) is $P_{vf}$.
+\noindent The factor loadings vector containing the $v$ loadings for $f$ factors is $P_{vf}$.  
+\item Measurement error matrix:\\
+\noindent The measurement error matrix containing $v$ error terms for $n$ individuals is $U_{nv}$.
+\item Measurement error weights:\\
+\noindent The measurement error weights containing the $v$ weights for $v$ equations is $D_{vv}$. In this document I assume that this matrix is equal to the identity matrix of size $v$, $I_{vv}$.
+\item Matrix system:\\
+\noindent The standardized measurement system for $n$ individuals, $v$ measures, and $f$ factors is
+\begin{equation}
+Z_{nv} = F_{nf} P'_{fv} + U_{nv} D'_{vv}.
+\end{equation}
+\item Covariance matrix of the measurement system (in deviation):\\
+\begin{equation}
+C_{vv} := \frac{1}{N} X'_{vn}X_{nv}.
+\end{equation}
+\item Correlation matrix of the measurement system (in deviation):\\
+\begin{equation}
+R_{vv} := S_{vv}^{-1} C_{vv} S_{vv}^{-1}. \label{eq:corrsysstd}
+\end{equation}
+\noindent where $S_{vv}^{-1}$ is a diagonal matrix and contains the standard deviation of measurement $v$ in entry $vv$. Importantly, $R_{vv} = \frac{1}{N} Z'_{vn}Z_{nv}$. Thus, $S_{vv}^{-1}$ allows to go from $X_{nv}$ to $Z_{nv}$. 
+\end{enumerate}
+
+\indent $U_{nv}$ could either be a factor that is dedicated to one measure or measurement error. These are indistinguishable from the perspective of the statistician who extracts factors. There is a simplifying procedure that allows us to ignore $U_{nv}$ in the context of Economics, and it is the following: (i) ignore the existence of $U_{nv}$ and assume the complete measurement system is correlated; (ii) extract the factors; (iii) consider the measurement error in measurement system as part of the system for which the factors are inputs. Concretely, a method extracts factor $F_{iv}$ for individual $i$ while the ``real'' factor is $\hat{F_{iv}} + \eta_{iv}$. A standard treatment of $F_{iv}$ as a variable with measurement error enables us to consider it in the context of regression analysis. This is why henceforth I consider the system
+\begin{equation}
+Z_{nv} = F_{nf} P'_{fv}.
+\end{equation} 

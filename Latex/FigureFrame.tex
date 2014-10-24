@@ -1,0 +1,19 @@
+%Project       : Resources, FigureFrame
+%Description: figure frame for LaTeX documents   
+%Basics:	      use the HelperFile in the same folder of this file
+%This version: 10/24/2014
+%This .do file:   Jorge Luis Garcia
+%This project : CEHD 
+
+\begin{center}
+\begin{figure}[H] 
+\caption{Your Caption}
+\label{figure:youlabel}
+\centering
+\includegraphics[width=3.5in, height=2in]{yourfigure.eps}
+\floatfoot{
+\tiny
+Note: this is your footnote.
+}
+\end{figure}
+\end{center}

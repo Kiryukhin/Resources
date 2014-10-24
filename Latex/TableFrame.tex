@@ -1,0 +1,20 @@
+%Project       : Resources, TableFrame
+%Description: table frame for LaTeX documents   
+%Basics:	      use the HelperFile in the same folder of this file
+%This version: 10/24/2014
+%This .do file:   Jorge Luis Garcia
+%This project : CEHD 
+
+\begin{table}[H] 
+\begin{threeparttable}
+\caption{Your Caption}
+\label{table:yourlabel}
+\centering 
+\input{yourtable.tex}
+\begin{tablenotes}
+\tiny
+\item Note 1: your first note.
+\item Note 2: your second note.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}

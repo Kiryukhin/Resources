@@ -1,0 +1,35 @@
+%Input preamble
+\input{HelperFiles/Resources}
+
+\begin{document}
+
+\title{Factor Analysis}
+\author{Jorge Luis Garc\'{i}a\thanks{Department of Economics, the University of Chicago (jorgelgarcia@uchicago.edu).} $^{,}$\thanks{I thank Sneha Elango, Tim Kautz, and Bradley Setzler for helpful comments.}}
+\date{First Draft: May 29, 2014 \\ This Draft: \today}
+\maketitle
+
+
+\begin{abstract}
+\noindent The objective of this document is to describe a step-by-step methodology to extract factors, or underlying latent variables, from a set of observed measures. Factor analysis is arbitrary by construction. Thus, I intend to provide the exact steps for factor analyzing a set of measures and elect a consistent way of being arbitrary. The theoretical fundamentals of this document come from \citet{gorsuch1983factor}. Although this author (or any other author) does not suggest any method over the other, I justify why the methods I elect are simple and transparent. Finally, I provide implementations in Python and Stata in separate files.
+\end{abstract}
+
+%Diagonal Factor Analysis
+\section{Diagonal Factor Analysis} \label{section:dfa}
+\input{Sections/factors/setting}
+\input{Sections/factors/notation}
+\input{Sections/factors/method}
+\input{Sections/factors/number}
+\input{Sections/factors/annotations}
+
+%Rotating the Factors Analysis
+\section{Why Rotation Makes sense and How to Go about it?} \label{section:rfa}
+\input{Sections/factors/rotateintro}
+
+
+
+%\clearpage
+\bibliographystyle{chicago}
+\bibliography{BibtexFiles/Resources}
+\clearpage
+
+\end{document}

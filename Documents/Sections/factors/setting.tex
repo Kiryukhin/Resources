@@ -1,0 +1,10 @@
+\subsection{Setting}
+Let $v = 1, \ldots, V$ index the number of measures and $f = 1, \ldots, F$ the number of factors in the sets $\mathcal{V}, \mathcal{F}$, with cardinaliies $V$ and $F$, respectively. Let $n = 1, \ldots, I$ index the individuals observations in the set $\mathcal{I}$ with cardianlity $I$. $X_{iv}$ is \textit{observed} measure for individual $i$. It loads on the factors $F_{i1}, \ldots, F_{iF}$ and the factor loadings are the real numbers $w_{v1}, \ldots, w_{vF}$. Thus, the measurement system for individual $i$ is 
+\begin{eqnarray}
+X_{i1} &=& w_{11}F_{i1} + \cdots + w_{1F}F_{iF} + \eta_{i1} \nonumber \\
+\vdots &=& \ddots \nonumber \\
+X_{iV} &=& w_{V1}F_{i1} + \cdots + w_{VF}F_{iF} + \eta_{iV} \label{eq:system} \\
+\end{eqnarray}
+
+\noindent where $\eta_{iv}$ is measurement error in the measure $v$ of individual $i$ and satisfies the mean independence property, i.e. $\mathbb{E} \left( \eta_{iv} | F_{if}  \right) = 0$ for $f = 1, \ldots F$.\\
+\indent We observe the LHS of \eqref{eq:system} as a set of measures and we do not observe the RHS. The objective of factor analysis is to recover $F_{i1}, \ldots, F_{iF}$, i.e. to recover a set of underlying scores defining the measures  $X_{i1}, \ldots, X_{iV}$. This with the objective of, for example, obtaining a reduction in the dimension of the problem at hand.\footnote{An example of this is \citet{bernal2011child}. They have a set of instruments shifting women's labor supply in the US. Given that welfare rules are the base of their instruments and the welfare system in the US is complex, the set of instruments is very wide and they face a ``many instruments problem'', i.e. 2SLS estimates are biased towards OLS estimates when the number of overidentifying instruments is large \citep[see][]{stock2002testing,andrews2007testing,hansen2008estimation,anderson2010asymptotic}. Thus, they factor analyze their set of instruments and argue that their 2SLS estimates are similar to LIML estimates, which correct the bias in 2SLS in the case of many instruments \citep[see][]{hansen2008estimation}.}

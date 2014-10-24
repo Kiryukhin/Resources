@@ -1,0 +1,71 @@
+\noindent In the following lines we write-up a methodology accounting for the following usual threads to internal validity in the evaluation of Early Childhood Interventions. Specifically, we tailor our inference methodology to account for the following: (i) compromised randomization; (ii) small sample size; (iii) attrition.\\ 
+\indent Let $\mathcal{I}$ be the index for participants of a generic intervention with typical element $i$. The cardinality of $\mathcal{I}$, $\#\mathcal{I}$, is the number of participants of the program, $N$. The observed outcome of individual $i$ is:
+\begin{equation}
+Y_{i} = D_{i}Y_{i}(1) + (1 - D_{i}) Y_{i}(0)
+\end{equation}
+where $D_{i}$ indicates treatment status. $D_{i} = 1$ means that individual belongs to the treatment group and $D_{i} = 0$ to the control group. $(Y_{i}(0), Y_{i}(1))$ are the outcomes of participant $i$ when her treatment status is \emph{fixed} at control and treatment statuses, respectively. Fixing means that the value $D_{i}$ takes a value exogenously. For instance, $Y_{i}(0)$ is the value that the outcome takes when the treatment is exogenously set to control status.\footnote{\citet{heckman2013causal} discuss what \emph{fixing} means in Economics and how does it differ from \emph{conditioning} in Statistics; they discuss the link of this concepts to causality.}\\
+\indent \citet{heckman2010analyzing} explain how randomization solves potential problems of selection bias. They argue that it induces independence between the counter-factual outcomes, $(Y_{i}(0), Y_{i}(1))$, and the treatment status indicator, $D_{i}$, conditional on pre-program or background variables, which we denote by $X$, used in the randomization protocol. Mathematically, randomization validates Assumption \ref{assumption:independence}:
+
+\begin{assumption} 
+\label{assumption:independence}
+(Counterfactual Outcomes-Treatment Conditional Independence) 
+$(Y_{i}(0), Y_{i}(1)) \independent D|X$, where $X,D,Y(0),Y(1)$ are $N$-dimensional vectors. Each of these vectors' entries are associated with each participant of the program, e.g. 
+$X = (X_{i}:i \in \mathcal{I})$.
+\end{assumption}
+
+\noindent By design, $X$ contains information on pre-treatment variables.\\
+\indent Our objective is to test the null hypothesis of no treatment effect. Put differently, we want to test if the outcome vectors, conditioned on pre-program variables, have the same distribution:
+
+\begin{hypothesis} 
+\label{hypothesis:null}
+(Counterfactural Outcomes Equivalent Distribution) 
+$Y(1) \equald Y(0) | X$, where $\equald$ means distribution equivalence.
+\end{hypothesis}
+
+\noindent Actually, in this context, we can test Hypothesis \ref{hypothesis:null} in a more tractable way; Assumption \ref{assumption:independence}
+and Hypothesis \ref{hypothesis:null} imply
+\begin{hypothesis} (Outcome-Treatment Independence)\label{hypothesis:nullp}
+$Y \independent D|X $.
+\end{hypothesis}
+
+\indent Testing Hypothesis \ref{hypothesis:nullp} has some methodological challenges that we attempt to solve. First, the interventions we focus on have small sample sizes. This casts doubts on inference that relies on the asymptotic behavior of test statistics. We use exact permutation tests to address this problem. We tailor the tests to account for the exact randomization protocol of the program and account for the second challenge: compromised randomization. Third, non-random attrition biases our estimates. We use an inverse probability weighting scheme to consider this issue. Our weights are based on the probability of attrition conditioned on pre-program variables.\\
+
+\subsection*{Small Sample Inference} \label{section:smallsample}
+Our permutation test is valid for small sample sizes. To construct it, we explore the invariance of the joint distribution of $(Y,D)$ under permutations that swap elements of the treatment status vector, $D$. This arises from two statistical properties: (i) randomization guarantees that $D$ is exchangeable for a set of selected permutations. Put differently, the distribution of $D$ remains the same for a set of selected swaps of elements in it; (ii) Hypothesis \ref{hypothesis:nullp}, under which we construct the inference method.\\
+\indent Let us develop the first property more. Colloquially, ``scrambling'' the order of the participants who share the same values of $X$ does not change the underlying distribution of the treatment assignment vector, $D$. Actually, $X$ limits the set of permutations that do not alter the distribution of $D$, i.e. there is a set of admissible permutations. \\
+\indent Let $\mathcal{G}_{X}$ be the set of admissible permutations--that is, the set of permutations for all individuals who share the same value of $X$. Formally,
+\begin{definition} (Admissible Permutations) \label{definition:admissible}
+\begin{equation*} \label{eq:Pi1}
+    \mathcal{G}_X =\{ \pi_g :\mathcal{I} \rightarrow\mathcal{I} \ | \ \text{ $\pi_g$ is a bijection and }
+        (\pi_g(i) =j) \Rightarrow (X_i = X_j)\: \forall \: i \in \mathcal{I}\}.
+\end{equation*}
+\end{definition}
+\noindent Thus, we can write:
+\begin{property} (Exchangeability) \label{property:exch}
+$D \equald gD \ \forall g \in \mathcal{G}_X$ where $gD = (D_{\pi_g(i)} : i \in \mathcal{I})$.
+\end{property}
+
+\noindent An appealing feature of Property \ref{property:exch} is that it relies on limited information about the randomization protocol. It does not require a full specification of the distribution of $D$ or about the assignment mechanism. The variables that the protocol uses, $X$, are sufficient. Actually, this makes the inference method hold when the randomization compromises are based on $X$. In other words, the method considers the randomization process and builds on its structure.\\
+\indent Hypothesis \ref{hypothesis:nullp} states that the vector of outcomes is independent of the vector of treatment assignment, $D$. Together with Property \ref{property:exch}, this implies that the joint distribution of outcomes and treatment status is invariant under the set of admissible permutations, $\mathcal{G}_{X}$. Theorem \ref{theorem:randomization} summarizes this. We follow the literature and call this theorem the Randomization Hypothesis.
+\begin{theorem} \label{theorem:randomization} (Randomization Hypothesis)
+Assume that Hypothesis \ref{hypothesis:nullp} holds. Then, the joint distribution of outcomes, $Y$, and treatment assignment, $D$, are invariant under the set of admissible permutations, $\mathcal{G}_X$. This is,
+$$(Y,D)\equald (Y,gD) \ \forall g\in\mathcal{G}_X .$$
+\end{theorem}
+\begin{proof}
+By Property \ref{property:exch}, $D \equald gD \ \forall g\in\mathcal{G}_X $. But we know that $Y
+\independent D|X$ by Hypothesis \ref{hypothesis:nullp}. Thus $(Y,D)\equald (Y,gD) \ \forall g\in\mathcal{G}_X$.
+\end{proof}\\
+
+\indent A consequence of Theorem \ref{theorem:randomization} is that a statistic based on $Y$ and $D$ is distribution invariant under any admissible permutation, i.e. $\forall g \in \mathcal{G}_{X}$. Moreover, under Hypothesis \ref{hypothesis:nullp}, the exact distribution of a statistic is given by the collection of the values generated by all the permutations in $\mathcal{G}_{X}$ \citep[see][]{romano2005testing}.\\
+\indent We use Theorem \ref{theorem:randomization} to construct a permutation test. Let $T(Y,D)$ be a statistic associated with $Y$ and $D$ which large values provide evidence against Hypothesis \ref{hypothesis:nullp}. Let $c \in \mathbb{R}$ be a critical value such that we reject Hypothesis \ref{hypothesis:nullp} if $T(Y,D) \geq c$. Hence, if we want a test with significance level $\alpha$, the following must hold:
+\begin{align}
+    \Pr(\text{Reject Hypothesis~\ref{hypothesis:nullp} } &| \text{ Hypothesis~\ref{hypothesis:nullp} holds}) \nonumber \\
+\label{eq:TYD}
+    &= \Pr(T(Y, D)\geq c| \text{ Hypothesis~\ref{hypothesis:nullp} holds}) \leq \alpha.
+\end{align}
+
+\indent We take the $\alpha$-quartile of the set $\{ T(Y,gD)\ : g \in \mathcal{G}_{X} \}$ to compute the critical value. The theoretical justification of this is that the critical value can be computed by the fact that the distribution of $T(Y,D)$ is given by the set of values that $T(Y,gD)$ takes as different admissible permutations are allowed \citep[see][Theorem 15.2.2]{romano2005exact}.\\
+\indent It is important to note that $T(Y,D)$ is uniformly distributed across the values of $T(Y,gD)$ as different admissible permutations are allowed, i.e. with each $g \in \mathcal{G}_{X}$. Uniformity in this context means that each value that $T(Y,gD)$ takes is equally likely. This implies that the critical value can be computed through the $\alpha$-quantile of the set $\{ T(Y,gD)\ : g \in \mathcal{G}_{X} \}$.\\
+\indent In practice, permutation tests compare a test statistic computed on the original (not permuted) data with a distribution of test statistics obtained from a series of admissible permutations. The measure of evidence against the \emph{Randomization Hypothesis}, the $p-value$, is computed as the fraction of permuted data which yields a test statistic greater than the test statistic obtained with the not permuted data. In order to generate the distribution of test statistics and compute the critical value $c$, we assume full enumeration of the set of admissible permutations, $\mathcal{G}_{X}$. However, when the method is executed, it is common to take a random sample of admissible permutations, which size is arbitrary.\\
+\indent This method has the following benefits: (i) it relies on assumptions that are consequences of randomized trials; (ii) it does not require full information on the randomization protocol: the knowledge of which variables were used to randomize are enough, which we denote by $X$; (iii) it is fully non-parametric; (iv) it does not rely on any particular choice of a test statistic; (v) it is valid for any distribution of the data so that it is not based on particular asymptotic behaviors of the test statistic.\\
+\indent This method is robust to the choice of any test statistic that has direct relation with evidence against the null hypothesis. The choice of the particular statistic is associated with the power of the inference, not with its validity to contrast a hypothesis. We opt for the t-statistic associated with the mean difference between the treatment and the control groups to obtain results that are comparable with standard program evaluations.\\

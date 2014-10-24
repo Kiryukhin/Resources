@@ -1,0 +1,34 @@
+\subsection{Residual Factor Analysis} \label{section:method}
+\citet{gorsuch1983factor} calls my preferred method \textit{diagonal analysis}. Other literature names it triangular decomposition, sweep-out method, pivotal condensation, solid-staircase analysis, analytic factor analysis, maximal decomposition, or regression component analysis \citep[see][Chapter 2]{gorsuch1983factor}. In fact, maybe the last name is the one that makes the most sense because the method has as its basic ingredient a fundamental of regression analysis, residual matrices. Residual factor analysis sounds even fancier.\\
+\indent These are the steps to extract the factor loadings of $F$ factors from the measurement system with $V$ measures from $N$ individuals. The method to obtaining the factor scores once the factor loadings are calculated is in Section \ref{sec:scores}, and the method to determining the number of factors to be extracted is discussed in Section \ref{section:nfactors}. 
+\begin{enumerate}
+\item Pick the first factor: elect one of the measures in the measurement system as the first factor. There are two possibilities for doing this:
+\begin{enumerate}
+\item Arbitrary: elect one measure with transparent meaning. In this case the objective is to have a well-known, meaningful measure as first factor.
+\item Maximum correlation across the measurement system: (i) compute the covariance matrix of the measurement system and square each of its entries; (ii) compute the sum of all its columns; (iii) pick the measurement with the largest sum.  In this case the objective is to have the measure that correlates the most with the rest of the measurement system as first factor.
+\end{enumerate}
+\item Compute the factor loadings for the first factor: the factor loadings for the first factor are the correlation coefficients of the first factor with the variables in the measurement system. Naturally, the factor loading of the first factor with the measure that defines it is $1$. Denoting with lower case letters the entries of \eqref{eq:corrsysstd} the factor loadings for the first factor are defined as:
+\begin{equation}
+w_{11} := r_{11}, \ldots, w_{V1} := r_{V1}. 
+\end{equation}
+\noindent These loadings define $P_{V1}$, i.e. the vector stacking the $V$ loadings of factor 1.
+\item Residualize the correlation matrix: obtain the correlation matrix of the measurement system after making it orthogonal to the first factor. Let $R_{vv}^{o1}$ correlation matrix of the measurement system after making it orthogonal to the first factor. Thus
+\begin{equation}
+R_{VV}^{o1} = R_{VV} - P_{V1} P'_{V1}. 
+\end{equation}
+\item Obtain a second factor: repeat steps 1 and 2. Usually, the second factor is going to be chosen based on criterion (b) in step 1 because after making the system orthogonal to the first factor it is difficult to interpret what the measures mean. 
+\item Obtain factors $3, \ldots, F$: repeat the process making the measurement system orthogonal to factors 1 and 2 in order to obtain factor 3. Likewise, repeat the process making the system orthogonal to factors 1, 2, \ldots, F-1 to obtain factor $F$.  
+\end{enumerate}
+
+\subsection{Obtaining the Factor Scores} \label{sec:scores}
+In the case when we have $N$ individuals, $V$ measures, and $F$ factors the measurement system is
+\begin{equation}
+Z_{NV} = F_{NF} P'_{FV}. \label{eq:sys}
+\end{equation}
+
+\noindent A simple manipulation of \eqref{eq:sys} leads to
+\begin{equation}
+F_{NF} = Z_{NV} P_{VF} \left( P'_{FV} P_{VF} \right)^{-1}, 
+\end{equation}
+
+\noindent which solves for the factor scores.
