@@ -86,7 +86,7 @@ save   "`data'", replace
 foreach num of numlist 1(1)`B'{
 	preserve
 	keep z o
-	bsample, strata(o)
+	sample 99.9999, by(o)
 	gen id = _n
 	drop o
 	rename z z_`num' 
@@ -169,4 +169,3 @@ restore
 drop yc
 rename z_0 z
 drop z_*
-
