@@ -1,5 +1,0 @@
-This graph uses family demographics (mother's education, household income, etc.), IQ measures" ///
-           "(Stanford-Binet, WISC), achievement (Achenbach, PIAT, CAT), crime, health, personality (Achenbach" ///
-           "parent and teacher), schooling variables (absences), and parenting (PARI). If an individual was missing data" ///
-           "for all of the variables for any given year, then they were categorized as missing. " ///
-           "Those who had data for at least one variable for a year are included in the plot.
