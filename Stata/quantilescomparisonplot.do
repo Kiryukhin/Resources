@@ -62,7 +62,7 @@ foreach num of numlist 1(1)`qm1' {
 foreach numy of numlist 2 3 {
 	foreach num of numlist `qm1'(-1)1 {
 		gen qindicator`numy'`num' = 1 if $f != . & $cat == `numy'
-		replace qindicator`numy'`num' = `num' + 1 if $f >= fqtile`num' & $cat == `numy'  
+		replace qindicator`numy'`num' = `num' + 1 if $f >= fqtile`num' & $cat == `numy' & $f != .
 	}
 	egen qindicator`numy' = rowmax(qindicator`numy'*)
 	drop qindicator`numy'`qm1'-qindicator`numy'1
