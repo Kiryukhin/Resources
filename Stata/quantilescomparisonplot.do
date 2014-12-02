@@ -9,9 +9,8 @@ Project    : Resources, Quantiles Comparison Plots
 Description: this .do file generates plots establishing how one distribution fits other
 			 distribution
 
-Basics: declare the measures Z, and the individual indetifier id
-        obtain a temporal file called F to be merged with the original
-		data set through the provided id
+Basics: declare the variable to be analyzes, f, the category, c, and 
+		allow for three categories: 1,2,3. 1 is the main category. 
 
 		
 This version: 12/01/2014
@@ -26,52 +25,55 @@ This project : CEHD
 
 clear all
 // 100 observations 
-set obs 100
+set obs 1000
 gen id = _n  
 
 // generate relevant variables
-gen w = rnormal(100,15)
-gen b = rnormal(100,15)
-gen h = rnormal(100,15)
-*/ 
+gen f = rnormal(100,15)
 
+// generate three categories
+generate cat = floor((3-1+1)*runiform() + 1)
+*/
+ 
 // declare variables
-// main distribution
-global w w
-// main distribution label
-global wlabel W 
-// input distributions to analyze
-global bh b h
-// label input distributions
-global blabel B
-global hlabel H
+// variable to be analyzed
+global f f
+// category analysis
+global cat cat
+
+// label main category
+global label1 W 
+
+// label reminder categories
+global label2 B
+global label3 H
 
 // create plot
 // declare quantiles
 local   q = 10
 local qm1 = `q' - 1
 // obtain quantiles of the main distribution
-_pctile $w, nq(`q')
+_pctile $f if $cat == 1, nq(`q')
 
 foreach num of numlist 1(1)`qm1' {
-	gen wqtile`num' = r(r`num')
+	gen fqtile`num' = r(r`num')
 }
 
-foreach var of varlist $bh {
+foreach numy of numlist 2 3 {
 	foreach num of numlist `qm1'(-1)1 {
-		gen qindicator`var'`num' = 1 if `var' != .
-		replace qindicator`var'`num' = `num' + 1 if `var' >= wqtile`num' 
+		gen qindicator`numy'`num' = 1 if $f != . & $cat == `numy'
+		replace qindicator`numy'`num' = `num' + 1 if $f >= fqtile`num' & $cat == `numy'  
 	}
-	egen qindicator`var' = rowmax(qindicator`var'*)
-	drop qindicator`var'`qm1'-qindicator`var'1
+	egen qindicator`numy' = rowmax(qindicator`numy'*)
+	drop qindicator`numy'`qm1'-qindicator`numy'1
 }
 
 
 # delimit
-twoway (histogram qindicatorb, start(1) discrete fraction color(gs10)  barwidth(.75) yline(.1, lcolor(gs5) lpattern(dash)))
-	   (histogram qindicatorh, start(1) discrete fraction fcolor(none) barwidth(.75) lcolor(black)),
-	   legend(label(1 ${blabel}) label(2 ${hlabel}))
-	   xtitle(Quantiles in the ${wlabel} Distribution) ytitle(Fractiion)
+twoway (histogram qindicator2, start(1) discrete fraction color(gs10)  barwidth(.75) yline(.1, lcolor(gs5) lpattern(dash)))
+	   (histogram qindicator3, start(1) discrete fraction fcolor(none) barwidth(.75) lcolor(black)),
+	   legend(label(1 ${label2}) label(2 ${label3}))
+	   xtitle(Quantiles in the ${label1} Distribution) ytitle(Fractiion)
 	   xlabel(1[1]`q', grid glcolor(gs14)) ylabel(, angle(h) glcolor(gs14))
 	   graphregion(color(white)) plotregion(fcolor(white));
 delimit cr
