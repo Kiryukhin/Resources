@@ -20,7 +20,7 @@ This .do file: Jorge Luis Garcia
 This project : CEHD
 
 */
-
+/*
 // construct fake data
 // comment in if you want to test
 
@@ -33,6 +33,7 @@ gen id = _n
 gen w = rnormal(100,15)
 gen b = rnormal(100,15)
 gen h = rnormal(100,15)
+*/ 
 
 // declare variables
 // main distribution
