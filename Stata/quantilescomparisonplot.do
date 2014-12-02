@@ -19,7 +19,7 @@ This .do file: Jorge Luis Garcia
 This project : CEHD
 
 */
-/*
+
 // construct fake data
 // comment in if you want to test
 
@@ -33,7 +33,6 @@ gen f = rnormal(100,15)
 
 // generate three categories
 generate cat = floor((3-1+1)*runiform() + 1)
-*/
  
 // declare variables
 // variable to be analyzed
