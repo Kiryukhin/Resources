@@ -9,10 +9,11 @@ Project    : Resources, Small Sample Inference (Permutation Based)
 Description: this .do file tests mean differences across two groups
 			 using small sample inferences (permutation based)
 
-Basics: declare the variable indicating the orbits on observed variables, O
-                the sets of regressors you want to clean for, X
-                the treatment indicator, Z
-                the outcome, Y
+Basics: declare the variable indicating the orbits on observed variables, o
+				the weights, w
+                the sets of regressors you want to clean for, x
+                the treatment indicator, z
+                the outcome, y
 		
 This version: 10/15/2014
 
@@ -146,7 +147,7 @@ gen meandiff = `meandiff'
 // gen no reject indicators
 // for absolute value
 gen     rameandiff = 1
-replace rameandiff = 0 if  apmeandiff < meandiff
+replace rameandiff = 0 if  apmeandiff < abs(meandiff)
 
 // for level value
 gen     rmeandiff = 1

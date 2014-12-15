@@ -20,11 +20,10 @@ This project : CEHD
 
 */
 
+
 // construct fake data
 // comment in if you want to test
-
 clear all
-// 100 observations 
 set obs 1000
 gen id = _n  
 
@@ -33,7 +32,9 @@ gen f = rnormal(100,15)
 
 // generate three categories
 generate cat = floor((3-1+1)*runiform() + 1)
- 
+
+
+// starts here when not test
 // declare variables
 // variable to be analyzed
 global f f
@@ -47,7 +48,6 @@ global label1 W
 global label2 B
 global label3 H
 
-// create plot
 // declare quantiles
 local   q = 10
 local qm1 = `q' - 1
