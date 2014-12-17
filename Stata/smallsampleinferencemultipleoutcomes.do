@@ -76,6 +76,11 @@ global x x
 local nO = 10
 // declare outcomes
 global y y1-y10
+// declare labels for outcomes
+# delimit
+global ylabel y1 y2 y3 y4 y5
+              y6 y7 y8 y9 y10; 
+# delimit cr
 
 // permute the treatmente variable
 // set number of resamples
@@ -187,6 +192,140 @@ foreach var of varlist $y {
 
 // clean matrix of first starting row
 matrix test = test[2...,1...]
+// create matrices sorted according to p-values
+// one tail
+preserve
+clear
+svmat test
+gen on = _n
+sort test4
+mkmat *, mat(testonesidedp)
+restore
+
+// two tails
+preserve
+clear
+svmat test
+gen on = _n
+sort test5
+mkmat *, mat(testtwosidedp)
+restore
+
+// stepdown correction for permutation p-value
+// all permutation estmiates in a matrix
+matrix pmeandiff = J(`B',1,.)
+foreach var of varlist $y {
+	matrix pmeandiff = [pmeandiff,pmeandiff`var']
+}
+
+// to a database
+matrix pmeandiff = pmeandiff[1...,2...]
+preserve
+clear
+svmat pmeandiff
+
+// impose the null
+foreach num of numlist 1(1)`nO'{
+	summ pmeandiff`num'
+	replace pmeandiff`num' = (pmeandiff`num' - r(mean))
+}
+
+
+matrix sdtt = [.]
+matrix colnames sdtt = sdtt
+matrix sdot = [.]
+matrix colnames sdot = sdot
+
+foreach num of numlist 1(1)`nO' {
+	capture drop pmeandiff ipmeandiff_two ipmeandiff_one
+	egen pmeandiff = rowmax(pmeandiff`num'-pmeandiff`nO')
+	
+	// two tails
+	gen     ipmeandiff_two = 1
+	replace ipmeandiff_two = 0 if  abs(pmeandiff) < abs(testtwosidedp[`num',1]) 
+	summ ipmeandiff_two 
+	matrix sd`num'tt = r(mean)
+	matrix colnames sd`num'tt = sdtt
+	mat_rapp sdtt : sdtt sd`num'tt
+	
+	
+	// one tail
+	gen		ipmeandiff_one = 1
+	replace ipmeandiff_one = 0 if pmeandiff < testtwosidedp[`num',1] 
+	summ ipmeandiff_one
+	matrix sd`num'ot = r(mean)
+	matrix colnames sd`num'ot = sdot
+	mat_rapp sdot : sdot sd`num'ot
+	
+}
+
+matrix sdtt = sdtt[2...,1...]
+matrix sdot = sdot[2...,1...]
+restore
+
+// from test merge meandiff and naive pvals
+preserve
+clear
+svmat test
+keep test1-test3
+gen on = _n
+rename test1 meandiff
+rename test2 naiveonetail
+rename test3 naivetwotail
+tempfile test
+save "`test'", replace
+restore
+
+
+// from testonesidedp merge one tail permutation and sd
+preserve 
+clear
+matrix testonesidedp = [testonesidedp,sdot]
+svmat testonesidedp 
+keep testonesidedp4 testonesidedp6 testonesidedp7
+rename testonesidedp4 permonetail
+rename testonesidedp6 on
+rename testonesidedp7 peronetailsd
+tempfile testoneper
+save "`testoneper'", replace
+restore
+
+// from testtwosidedp merge one tail permutation and sd
+preserve 
+clear
+matrix testtwosidedp = [testtwosidedp,sdtt]
+svmat testtwosidedp 
+keep testtwosidedp5 testtwosidedp6 testtwosidedp7
+rename testtwosidedp5 permtwotail
+rename testtwosidedp6 on
+rename testtwosidedp7 pertwotailsd
+tempfile testtwoper
+save "`testtwoper'", replace
+restore
+
+// generate table with all the p-values
+preserve
+use "`test'", clear
+merge 1:1 on using "`testoneper'"
+tab _merge
+drop if _merge != 3
+drop _merge
+merge 1:1 on using "`testtwoper'"
+tab _merge
+drop if _merge != 3
+drop _merge on
+aorder
+mkmat *, mat(testfmatrix)
+matrix rownames testfmatrix = $ylabel  
+restore
+
+// output matrix
+/*
+#delimit
+outtable using yourfile, 
+mat(testfmatrix) replace nobox center f(%9.3f);
+#delimit cr
+*/
 
 
 // go back to initial data
