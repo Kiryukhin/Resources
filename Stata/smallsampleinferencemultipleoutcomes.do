@@ -13,9 +13,11 @@ Basics: declare the variable indicating the orbits on observed variables, o
 				the weights, w
                 the sets of regressors you want to clean for, x
                 the treatment indicator, z
-                the outcomes, y
+                the outcomes, y --careful! the code reverses this outcomes
+                *I recommend use this through a temporary file, not the actual
+                 data file
 		
-This version: 10/15/2014
+This version: 12/19/2014
 
 This .do file: Jorge Luis Garcia
 This project : CEHD
@@ -56,6 +58,7 @@ foreach num of numlist 1(1)10 {
 	gen y`num' = rnormal(20,5)
 }
 
+// estimation starts here
 // declare data
 // individual identifier
 global id id  
@@ -84,10 +87,16 @@ global ylabel y1 y2 y3 y4 y5
 
 // permute the treatmente variable
 // set number of resamples
-local B = 50
+local B = 1000
 
-// clean the outcome variable for x
+// reverse and clean the outcome variable for x
 foreach var of varlist $y {
+	reg `var' $z [iw=$w]
+	matrix b`var' = e(b)
+	local b`var' = b`var'[1,1]
+	gen reverse`var' = 1
+	replace reverse`var' = -1 if `b`var'' < 0
+	replace `var' = `var'*reverse`var'
 	reg `var' $x [iw=$w]
 	predict `var'_cres, resid
 }
@@ -198,7 +207,7 @@ preserve
 clear
 svmat test
 gen on = _n
-sort test4
+sort test2
 mkmat *, mat(testonesidedp)
 restore
 
@@ -207,7 +216,7 @@ preserve
 clear
 svmat test
 gen on = _n
-sort test5
+sort test3
 mkmat *, mat(testtwosidedp)
 restore
 
@@ -218,10 +227,20 @@ foreach var of varlist $y {
 	matrix pmeandiff = [pmeandiff,pmeandiff`var']
 }
 
-// to a database
-matrix pmeandiff = pmeandiff[1...,2...]
+// sort outcomes according to p-value size
+matrix pmeandiff = pmeandiff[1...,2...]'
+matrix pmeandiff = [test,pmeandiff]
 preserve
 clear
+svmat pmeandiff
+sort  pmeandiff2
+// dop all test info
+drop pmeandiff1-pmeandiff5
+
+// to data
+mkmat *, matrix(pmeandiff)
+clear
+matrix pmeandiff = pmeandiff'
 svmat pmeandiff
 
 // impose the null
@@ -251,7 +270,7 @@ foreach num of numlist 1(1)`nO' {
 	
 	// one tail
 	gen		ipmeandiff_one = 1
-	replace ipmeandiff_one = 0 if pmeandiff < testtwosidedp[`num',1] 
+	replace ipmeandiff_one = 0 if pmeandiff < testonesidedp[`num',1] 
 	summ ipmeandiff_one
 	matrix sd`num'ot = r(mean)
 	matrix colnames sd`num'ot = sdot
@@ -330,5 +349,6 @@ mat(testfmatrix) replace nobox center f(%9.3f);
 
 // go back to initial data
 drop *_cres
+drop reverse*
 rename z_0 z
 drop z_*
