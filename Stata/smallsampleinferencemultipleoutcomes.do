@@ -58,7 +58,6 @@ foreach num of numlist 1(1)10 {
 	gen y`num' = rnormal(20,5)
 }
 
-// estimation starts here
 // declare data
 // individual identifier
 global id id  
@@ -75,6 +74,7 @@ global z z
 // continuous x
 global x x
 
+// estimation starts here
 // declare number of outcomes
 local nO = 10
 // declare outcomes
@@ -85,7 +85,6 @@ global ylabel y1 y2 y3 y4 y5
               y6 y7 y8 y9 y10; 
 # delimit cr
 
-// permute the treatmente variable
 // set number of resamples
 local B = 1000
 
