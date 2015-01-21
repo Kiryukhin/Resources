@@ -15,7 +15,7 @@ This project : CEHD
 
 */
 
-/*
+
 // construct fake data
 // comment in if you want to test
 clear all
@@ -43,7 +43,7 @@ gen py3=y3/total
 global y1label y1
 global y2label y2
 global y3label y3
-*/
+
 //stacked bar graph
 
 # delimit 
@@ -54,7 +54,7 @@ global y3label y3
 	   ylabel(, angle(h) glcolor(gs14))
 	   graphregion(color(white)) plotregion(fcolor(white));
 #delimit cr
-	graph export stackedbar.eps, replace
+	// graph export stackedbar.eps, replace
 	
 
 	
@@ -67,7 +67,7 @@ global y3label y3
 	   ylabel(, angle(h) glcolor(gs14))
 	   graphregion(color(white)) plotregion(fcolor(white));
 #delimit cr
-	graph export hbar.eps, replace
+	// graph export hbar.eps, replace
 
 	
 # delimit 
@@ -81,6 +81,6 @@ global y3label y3
 	   ylabel(, angle(h) glcolor(gs14))
 	   graphregion(color(white)) plotregion(fcolor(white));
 #delimit cr
-	graph export twowaybar.eps, replace
+	// graph export twowaybar.eps, replace
 	
 	

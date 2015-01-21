@@ -29,6 +29,7 @@ gen id = _n
 
 // generate relevant variables
 gen f = rnormal(100,15)
+gen h = rnormal(100,5)
 
 // generate three categories
 generate cat = floor((3-1+1)*runiform() + 1)

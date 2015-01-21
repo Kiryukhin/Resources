@@ -86,33 +86,33 @@ global ylabel y1 y2 y3 y4 y5
 # delimit cr
 
 // set number of resamples
-local B = 1000
+local B = 10
 
 // reverse and clean the outcome variable for x
-foreach var of varlist $y {
-	reg `var' $z [iw=$w]
-	matrix b`var' = e(b)
-	local b`var' = b`var'[1,1]
-	gen reverse`var' = 1
-	replace reverse`var' = -1 if `b`var'' < 0
-	replace `var' = `var'*reverse`var'
+foreach var of varlist $y $z {
+	// reg `var' $z [iw=$w]
+	// matrix b`var' = e(b)
+	// local b`var' = b`var'[1,1]
+	// gen reverse`var' = 1
+	// replace reverse`var' = -1 if `b`var'' < 0
+	// replace `var' = `var'*reverse`var'
 	reg `var' $x [iw=$w]
 	predict `var'_cres, resid
 }
 
 // save current data as a tempfile
-rename z z_0
+rename ${z}_cres z_0
 tempfile data 
 save   "`data'", replace
 
 // permute the treatment indicator B times and store it
 foreach num of numlist 1(1)`B'{
 	preserve
-	keep z o
+	keep z_0 o
 	sample 99.9999, by(o)
 	gen id = _n
 	drop o
-	rename z z_`num' 
+	rename z_0 z_`num' 
 	
 	tempfile data_`num'
 	save   "`data_`num''", replace
@@ -133,9 +133,12 @@ matrix colnames test = meandiff naiveonetail naivetwotail ponetail ptwotail
 foreach var of varlist $y { 
 	reg `var'_cres z_0 [iw=$w]
 	matrix b = e(b)
-	local meandiff`var' = b[1,1]
-	local p1`var' = 1 - normal(abs(`meandiff`var''))
-	local p2`var' = 2*(1 - normal(abs(`meandiff`var'')))
+	local meandiff`var'  = b[1,1]
+	matrix V = e(V)
+	local meandiff`var't = (`meandiff`var'')/(V[1,1])
+	
+	local p1`var' = 1 - normal(abs(`meandiff`var't'))
+	local p2`var' = 2*(1 - normal(abs(`meandiff`var't')))
 	matrix naive`var' = [`meandiff`var'',`p1`var'',`p2`var'']
 	matrix colnames naive`var' = meandiff onetailp twotailp
 	matrix rownames naive`var' = naive
@@ -164,8 +167,6 @@ foreach var of varlist $y {
 	rename pmeandiff`var'1 pmeandiff`var'  
 	summ pmeandiff`var'
 
-	// force to null distribution
-	replace pmeandiff`var' = (pmeandiff`var' - r(mean))
 	// absolute value for two tailed test
 	gen apmeandiff`var' = abs(pmeandiff`var')
 
@@ -241,13 +242,6 @@ mkmat *, matrix(pmeandiff)
 clear
 matrix pmeandiff = pmeandiff'
 svmat pmeandiff
-
-// impose the null
-foreach num of numlist 1(1)`nO'{
-	summ pmeandiff`num'
-	replace pmeandiff`num' = (pmeandiff`num' - r(mean))
-}
-
 
 matrix sdtt = [.]
 matrix colnames sdtt = sdtt
@@ -348,6 +342,6 @@ mat(testfmatrix) replace nobox center f(%9.3f);
 
 // go back to initial data
 drop *_cres
-drop reverse*
-rename z_0 z
+// drop reverse*
+rename z_0 z_cres
 drop z_*
