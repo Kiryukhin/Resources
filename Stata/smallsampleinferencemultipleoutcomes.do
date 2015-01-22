@@ -86,7 +86,11 @@ global ylabel y1 y2 y3 y4 y5
 # delimit cr
 
 // set number of resamples
-local B = 500
+local B = 10
+
+// generate id that matches sample number
+rename $id id_real
+gen id = _n
 
 // reverse and clean the outcome variable for x
 foreach var of varlist $y $z {
@@ -344,4 +348,6 @@ mat(testfmatrix) replace nobox center f(%9.3f);
 drop *_cres
 // drop reverse*
 rename z_0 z_cres
-drop z_*
+drop id
+rename id_real $id 
+drop z_* reverse*
