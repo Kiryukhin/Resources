@@ -139,7 +139,7 @@ foreach var of varlist $y {
 	matrix b = e(b)
 	local meandiff`var'  = b[1,1]
 	matrix V = e(V)
-	local meandiff`var't = (`meandiff`var'')/(V[1,1])
+	local meandiff`var't = (`meandiff`var'')/(sqrt(V[1,1]))
 	
 	local p1`var' = 1 - normal(`meandiff`var't')
 	local p2`var' = 2*(1 - normal(abs(`meandiff`var't')))
