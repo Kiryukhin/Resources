@@ -88,14 +88,18 @@ global ylabel y1 y2 y3 y4 y5
 // set number of resamples
 local B = 10
 
+// generate id that matches sample number
+rename $id id_real
+gen id = _n
+
 // reverse and clean the outcome variable for x
 foreach var of varlist $y $z {
-	// reg `var' $z [iw=$w]
-	// matrix b`var' = e(b)
-	// local b`var' = b`var'[1,1]
-	// gen reverse`var' = 1
-	// replace reverse`var' = -1 if `b`var'' < 0
-	// replace `var' = `var'*reverse`var'
+	reg `var' $z [iw=$w]
+	matrix b`var' = e(b)
+	local b`var' = b`var'[1,1]
+	gen reverse`var' = 1
+	replace reverse`var' = -1 if `b`var'' < 0
+	replace `var' = `var'*reverse`var'
 	reg `var' $x [iw=$w]
 	predict `var'_cres, resid
 }
@@ -135,9 +139,9 @@ foreach var of varlist $y {
 	matrix b = e(b)
 	local meandiff`var'  = b[1,1]
 	matrix V = e(V)
-	local meandiff`var't = (`meandiff`var'')/(V[1,1])
+	local meandiff`var't = (`meandiff`var'')/(sqrt(V[1,1]))
 	
-	local p1`var' = 1 - normal(abs(`meandiff`var't'))
+	local p1`var' = 1 - normal(`meandiff`var't')
 	local p2`var' = 2*(1 - normal(abs(`meandiff`var't')))
 	matrix naive`var' = [`meandiff`var'',`p1`var'',`p2`var'']
 	matrix colnames naive`var' = meandiff onetailp twotailp
@@ -344,4 +348,6 @@ mat(testfmatrix) replace nobox center f(%9.3f);
 drop *_cres
 // drop reverse*
 rename z_0 z_cres
-drop z_*
+drop id
+rename id_real $id 
+drop z_* reverse*
