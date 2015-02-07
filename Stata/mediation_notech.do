@@ -60,17 +60,17 @@ foreach out of numlist `outcomes' {
 			   local   treat_cat`cat'_o`out' = round(estimation`cat'`out'[1,3], .01)
 			   local pvtreat_cat`cat'_o`out' = round(estimation`cat'`out'[4,3], .01)
 			   
-			   local   endp1_cat`cat'_o`out' = estimation`cat'`out'[1,4]
-			   local pvendp1_cat`cat'_o`out' = estimation`cat'`out'[4,4]
+			   local   endp1_cat`cat'_o`out' = estimation`cat'`out'[1,6]
+			   local pvendp1_cat`cat'_o`out' = estimation`cat'`out'[4,6]
 			   
-			   local   endp2_cat`cat'_o`out' = estimation`cat'`out'[1,5]
-			   local pvendp2_cat`cat'_o`out' = estimation`cat'`out'[4,5]
+			   local   endp2_cat`cat'_o`out' = estimation`cat'`out'[1,7]
+			   local pvendp2_cat`cat'_o`out' = estimation`cat'`out'[4,7]
 			   
-			   local   endp3_cat`cat'_o`out' = estimation`cat'`out'[1,6]
-			   local pvendp3_cat`cat'_o`out' = estimation`cat'`out'[4,6]
+			   local   endp3_cat`cat'_o`out' = estimation`cat'`out'[1,8]
+			   local pvendp3_cat`cat'_o`out' = estimation`cat'`out'[4,8]
 				
-			   local   resid_cat`cat'_o`out' = estimation`cat'`out'[1,12]
-			   local pvresid_cat`cat'_o`out' = estimation`cat'`out'[4,12]			   
+			   local   resid_cat`cat'_o`out' = estimation`cat'`out'[1,5]
+			   local pvresid_cat`cat'_o`out' = estimation`cat'`out'[4,5]			   
 	}
 }  
 
@@ -89,7 +89,7 @@ foreach out of numlist `outcomes' {
 		# delimit
 		foreach val in endp1_cat endp2_cat endp3_cat resid_cat {;
 		# delimit cr
-			local `val'`cat'_o`out' = ``val'`cat'_o`out''/`treat_cat`cat'_o`out''
+			// local `val'`cat'_o`out' = ``val'`cat'_o`out''/`treat_cat`cat'_o`out''
 		
 		# delimit
 		matrix restimates_cat`cat'_o`out' = [`treat_cat`cat'_o`out'',`pvtreat_cat`cat'_o`out'',`endp1_cat`cat'_o`out'',
@@ -114,6 +114,7 @@ label values outcome outcomeslabel
 
 // duplicate variable to create different color when p-value is less than .1
 foreach var in endowp1 endowp2 endowp3 resid {
+	replace `var' = `var'/treat
 	gen `var'_2 = `var'
 	replace `var'    = . if `var'pval >  .10 | abs(`var') < .1
 	replace `var'_2  = . if `var'pval <= .10 | abs(`var'_2) < .1
@@ -134,10 +135,10 @@ foreach cat of numlist `categories' {
 	           
 	           if $category == `cat', over(outcome, lab(labsize(small))) stack
 	ylabel(, angle(h) glcolor(gs14) labsize(small)) 
-	bar(1,  color(maroon*.5))            				  bar(2, color(maroon)) 
-	bar(3,  color(dknavy*.5))              				  bar(4, color(dknavy)) 
-	bar(5, color(black*.5))                            bar(6, color(black))
-	bar(7, fcolor(black*.3) lcolor(black) lpattern(dash)) bar(8, fcolor(black*.3) lcolor(black) lpattern(solid))
+	bar(1, color("204 0 0"*.5))            		   bar(2, color("204 0 0")) 
+	bar(3, color("255 102 0"*.5))                      bar(4, color("255 102 0")) 
+	bar(5, color("102 0 153"*.5))                     bar(6, color("102 0 153"))
+	bar(7, color(black*.5))                            bar(8, color(black))
 	
 	text(0 59 "Treatment Effect: ${t2} (p-value: ${p2})", place(e) size(vsmall))
 	text(0 4  "Treatment Effect: ${t1} (p-value: ${p1})", place(e) size(vsmall))	 
