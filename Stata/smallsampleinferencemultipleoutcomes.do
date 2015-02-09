@@ -1,6 +1,4 @@
-set more off
-clear all
-set matsize 11000
+
 
 /*
 
@@ -17,9 +15,9 @@ Basics: declare the variable indicating the orbits on observed variables, o
                 *I recommend use this through a temporary file, not the actual
                  data file
 		
-This version: 12/19/2014
+This version: 2/9/2015
 
-This .do file: Jorge Luis Garcia
+This .do file: Jorge Luis Garcia, Andrés Hojman
 This project : CEHD
 
 */
@@ -29,7 +27,7 @@ set seed 2
 
 // construct fake data
 // comment in if you want to test
-
+/*
 clear all
 // generate data
 // 100 observations 
@@ -57,16 +55,17 @@ gen x=rnormal(0,1)
 foreach num of numlist 1(1)10 {
 	gen y`num' = rnormal(20,5)
 }
+*/
+// declare data: input your dataset here
 
-// declare data
 // individual identifier
 global id id  
 
 // weights
-global w w
+*global w w
 
 // orbits
-global o o 
+global o o
 
 // treatment indicator
 global z z
@@ -75,47 +74,65 @@ global z z
 global x x
 
 // estimation starts here
-// declare number of outcomes
-local nO = 10
 // declare outcomes
-global y y1-y10
-// declare labels for outcomes
-# delimit
-global ylabel y1 y2 y3 y4 y5
-              y6 y7 y8 y9 y10; 
-# delimit cr
+global y 	y
+
+*This section creates automatic labels for the rows (variables) based on original labels
+
+local labels `" a "'
+foreach var in $y{
+local l`var' : variable label `var'
+local l`var' `"`"`"`l`var''"' "'"'    // careful with modifying this! A space can make a difference
+local labels `labels' `l`var''
+di `" `labels' "' //just to check everything is going well
+}
+local labels: subinstr local labels `"a"' `""'
+di `" `labels' "' //just to check everything is going well
+global ylabel  `labels' 
+
+// declare labels for outcomes only if you are not using the automatic labels
+*# delimit
+*global ylabel  ;
+*# delimit cr;
+
+*Reverse: this will change the one-sided tests later. Put here a list of "socially bad" variables
+foreach var in {
+local `var'reverse 1
+}
 
 // set number of resamples
 local B = 10
 
-// generate id that matches sample number
-rename $id id_real
-gen id = _n
-
+* - - - - - - - - - - - - 
+local nO: word count $y
 // reverse and clean the outcome variable for x
 foreach var of varlist $y $z {
-	reg `var' $z [iw=$w]
-	matrix b`var' = e(b)
-	local b`var' = b`var'[1,1]
-	gen reverse`var' = 1
-	replace reverse`var' = -1 if `b`var'' < 0
-	replace `var' = `var'*reverse`var'
-	reg `var' $x [iw=$w]
+	// reg `var' $z [iw=$w]
+	// matrix b`var' = e(b)
+	// local b`var' = b`var'[1,1]
+	// gen reverse`var' = 1
+	// replace reverse`var' = -1 if `b`var'' < 0
+	// replace `var' = `var'*reverse`var'
+	reg `var' $x //[iw=$w]
 	predict `var'_cres, resid
 }
 
 // save current data as a tempfile
 rename ${z}_cres z_0
+
+drop id
+gen id = _n //this is necessary for the id's in the original data to match with the new fake id's
+
 tempfile data 
 save   "`data'", replace
 
 // permute the treatment indicator B times and store it
 foreach num of numlist 1(1)`B'{
 	preserve
-	keep z_0 o
-	sample 99.9999, by(o)
+	keep z_0 $o
+	sample 99.9999, by($o)
 	gen id = _n
-	drop o
+	if "$o"!="" drop $o
 	rename z_0 z_`num' 
 	
 	tempfile data_`num'
@@ -132,28 +149,32 @@ foreach num of numlist 1(1)`B'{
 
 // capture mean difference and naive p-value of one and two tailes tests
 matrix test = J(1,5,.)
-matrix colnames test = meandiff naiveonetail naivetwotail ponetail ptwotail
+matrix colnames test = diff naive1 naive2 perm1 perm2
 
 foreach var of varlist $y { 
-	reg `var'_cres z_0 [iw=$w]
+	reg `var'_cres z_0 //[iw=$w]
 	matrix b = e(b)
 	local meandiff`var'  = b[1,1]
+	di "`meandiff`var''"
+
 	matrix V = e(V)
-	local meandiff`var't = (`meandiff`var'')/(sqrt(V[1,1]))
+	local meandiff`var't = (`meandiff`var'')/sqrt(V[1,1])
 	
-	local p1`var' = 1 - normal(`meandiff`var't')
+	
+	if "``var'reverse'"=="1"	local p1`var' = normal(`meandiff`var't')
+	else						local p1`var' = 1 - normal(`meandiff`var't')
 	local p2`var' = 2*(1 - normal(abs(`meandiff`var't')))
 	matrix naive`var' = [`meandiff`var'',`p1`var'',`p2`var'']
-	matrix colnames naive`var' = meandiff onetailp twotailp
+	matrix colnames naive`var' = diff naive1 naive2
 	matrix rownames naive`var' = naive
-}
+	}
 
 foreach var of varlist $y {
 	// capture the mean difference for all permutations
 	matrix pmeandiff`var' = [.]
 	matrix colnames pmeandiff`var' = meandiff
 	foreach num of numlist 1(1)`B'{
-		reg `var'_cres z_`num' [iw=$w]
+		reg `var'_cres z_`num' //[iw=$w]
 		matrix b = e(b)
 		local  meandiff_`num'  = b[1,1]
 		matrix p`num'`var' = [`meandiff_`num'']
@@ -178,13 +199,22 @@ foreach var of varlist $y {
 	gen meandiff`var' = `meandiff`var''
 
 	// gen no reject indicators
-	// for absolute value
-	gen     rameandiff`var' = 1
+	// for absolute value (2-tails)
+	gen     rameandiff`var' = .
+	replace rameandiff`var' = 1 if  apmeandiff`var' > abs(meandiff`var')
 	replace rameandiff`var' = 0 if  apmeandiff`var' < abs(meandiff`var')
 
-	// for level value
-	gen     rmeandiff`var' = 1
+	// for level value (1-tail)
+	gen     rmeandiff`var' = .
+	if "``var'reverse'"=="1"{
+	replace rmeandiff`var' = 1 if   pmeandiff`var' < meandiff`var'
+	replace rmeandiff`var' = 0 if   pmeandiff`var' > meandiff`var'
+	}
+	else{
+	replace rmeandiff`var' = 1 if   pmeandiff`var' > meandiff`var'
 	replace rmeandiff`var' = 0 if   pmeandiff`var' < meandiff`var'
+	}
+
 
 	// get p-values
 	// two-tailed
@@ -194,8 +224,9 @@ foreach var of varlist $y {
 	// one-tailed
 	summ rmeandiff`var'
 	local plp`var' = r(mean)
+	
 	matrix test`var' = [naive`var',`plp`var'',`pap`var'']
-	matrix colnames test`var' = meandiff naiveonetail naivetwotail ponetail ptwotail
+	matrix colnames test`var' = diff naive1 naive2 perm1 perm2
 	matrix rownames test`var' = test`var'
 	
 	// append to test matrix
@@ -223,6 +254,7 @@ gen on = _n
 sort test3
 mkmat *, mat(testtwosidedp)
 restore
+
 
 // stepdown correction for permutation p-value
 // all permutation estmiates in a matrix
@@ -322,6 +354,7 @@ restore
 // generate table with all the p-values
 preserve
 use "`test'", clear
+
 merge 1:1 on using "`testoneper'"
 tab _merge
 drop if _merge != 3
@@ -332,22 +365,26 @@ drop if _merge != 3
 drop _merge on
 aorder
 mkmat *, mat(testfmatrix)
-matrix rownames testfmatrix = $ylabel  
+
+global edulabel   `"`"Years High School "' "' `"`"Years Community college "' "'  `"`"Years High School "' "' `"`"Years Community college "' "'  `"`"Years High School "' "' 
+macro list
+di `" $edulabel "'
+di `" $ylabel "'
+matrix rownames testfmatrix =  `" $edulabel "'
+matrix list testfmatrix
+matrix rownames testfmatrix =  `" $ylabel "'
+matrix list testfmatrix
 restore
 
 // output matrix
-/*
-#delimit
-outtable using yourfile, 
-mat(testfmatrix) replace nobox center f(%9.3f);
-#delimit cr
-*/
+matrix testfmatrix = testfmatrix[1...,1..5]
+
+outtable using "/Users/andreshojman/Desktop/RodrigoTE/RodrigoTE1", ///
+ mat(testfmatrix) replace nobox center f(%9.3f)
 
 
 // go back to initial data
 drop *_cres
 // drop reverse*
 rename z_0 z_cres
-drop id
-rename id_real $id 
-drop z_* reverse*
+drop z_*
