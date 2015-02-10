@@ -27,7 +27,7 @@ set seed 2
 
 // construct fake data
 // comment in if you want to test
-/*
+
 clear all
 // generate data
 // 100 observations 
@@ -54,15 +54,16 @@ gen x=rnormal(0,1)
 // y, outcome
 foreach num of numlist 1(1)10 {
 	gen y`num' = rnormal(20,5)
+label var y`num' "Label of Outcome `num'"
 }
-*/
+global y y1 y2 y3 y4 y5 y6 y7 y8 y9 y10
 // declare data: input your dataset here
 
 // individual identifier
 global id id  
 
 // weights
-*global w w
+global w w
 
 // orbits
 global o o
@@ -75,9 +76,10 @@ global x x
 
 // estimation starts here
 // declare outcomes
-global y 	y
+global y $y
 
 *This section creates automatic labels for the rows (variables) based on original labels
+*Careful: STATA matrices can only have 26 characters as rownames (including spaces)
 
 local labels `" a "'
 foreach var in $y{
@@ -379,7 +381,7 @@ restore
 // output matrix
 matrix testfmatrix = testfmatrix[1...,1..5]
 
-outtable using "/Users/andreshojman/Desktop/RodrigoTE/RodrigoTE1", ///
+outtable using "yourtableintext", ///
  mat(testfmatrix) replace nobox center f(%9.3f)
 
 
