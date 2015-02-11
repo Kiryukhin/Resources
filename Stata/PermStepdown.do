@@ -1,3 +1,5 @@
+
+
 /*
 
 Project    : Resources, Small Sample Inference (Permutation Based)
@@ -19,7 +21,7 @@ This .do file: Jorge Luis Garcia, Andrés Hojman
 This project : CEHD
 
 */
-macro drop all
+
 // set seed (even if you do not simulate data, help for the resampling)
 set seed 2
 
@@ -148,24 +150,32 @@ foreach num of numlist 1(1)`B'{
 }
 
 // capture mean difference and naive p-value of one and two tailes tests
-matrix test = J(1,5,.)
-matrix colnames test = diff naive1 naive2 perm1 perm2
+matrix test = J(1,10,.)
+matrix colnames test = Cmean Csd Tmean Tsd t diff naive1 naive2 perm1 perm2
 
 foreach var of varlist $y { 
 	reg `var'_cres z_0 //[iw=$w]
 	matrix b = e(b)
-	local meandiff`var'  = b[1,1]
-	di "`meandiff`var''"
-
+	local meandiff`var' = b[1,1]
+	di "Diff: `meandiff`var''"
 	matrix V = e(V)
 	local meandiff`var't = (`meandiff`var'')/sqrt(V[1,1])
+
+	egen miss`var'=rowmiss(`var'_cres z_0) //ignores weighting=0
 	
-	
+	sum `var' if miss`var'==0 & z==0
+	local Csd`var'  	= r(sd)
+	local Cmean`var'  	= r(mean)
+
+	sum `var' if miss`var'==0 & z==1
+	local Tsd`var'		= r(sd)
+	local Tmean`var'	= r(mean)
+
 	if "``var'reverse'"=="1"	local p1`var' = normal(`meandiff`var't')
 	else						local p1`var' = 1 - normal(`meandiff`var't')
 	local p2`var' = 2*(1 - normal(abs(`meandiff`var't')))
-	matrix naive`var' = [`meandiff`var'',`p1`var'',`p2`var'']
-	matrix colnames naive`var' = diff naive1 naive2
+	matrix naive`var' = [`Cmean`var'',`Csd`var'',`Tmean`var'',`Tsd`var'',`meandiff`var'',`meandiff`var't',`p1`var'',`p2`var'']
+	matrix colnames naive`var' = Cmean Csd Tmean Tsd diff t naive1 naive2
 	matrix rownames naive`var' = naive
 	}
 
@@ -226,7 +236,7 @@ foreach var of varlist $y {
 	local plp`var' = r(mean)
 	
 	matrix test`var' = [naive`var',`plp`var'',`pap`var'']
-	matrix colnames test`var' = diff naive1 naive2 perm1 perm2
+	matrix colnames test`var' = Cmean Csd Tmean Tsd diff t naive1 naive2 perm1 perm2
 	matrix rownames test`var' = test`var'
 	
 	// append to test matrix
@@ -240,24 +250,26 @@ matrix test = test[2...,1...]
 // one tail
 preserve
 clear
-svmat test
+svmat test, names(col)
 gen on = _n
-sort test2
+sort naive1
 mkmat *, mat(testonesidedp)
 restore
 
 // two tails
 preserve
 clear
-svmat test
+svmat test, names(col)
 gen on = _n
-sort test3
+sort naive2
 mkmat *, mat(testtwosidedp)
 restore
 
 
-// stepdown correction for permutation p-value
-// all permutation estmiates in a matrix
+// stepdown correction for permutation p-value  //
+// - - - - - - - - - - - - - - - - - - - - - - -//
+
+// all permutation estimates in a matrix
 matrix pmeandiff = J(`B',1,.)
 foreach var of varlist $y {
 	matrix pmeandiff = [pmeandiff,pmeandiff`var']
@@ -288,9 +300,13 @@ foreach num of numlist 1(1)`nO' {
 	capture drop pmeandiff ipmeandiff_two ipmeandiff_one
 	egen pmeandiff = rowmax(pmeandiff`num'-pmeandiff`nO')
 	
+	matrix list testtwosidedp
+	asd	
+
+	
 	// two tails
 	gen     ipmeandiff_two = 1
-	replace ipmeandiff_two = 0 if  abs(pmeandiff) < abs(testtwosidedp[`num',1]) 
+	replace ipmeandiff_two = 0 if  abs(pmeandiff) < abs(testtwosidedp[`num',6]) 
 	summ ipmeandiff_two 
 	matrix sd`num'tt = r(mean)
 	matrix colnames sd`num'tt = sdtt
@@ -299,7 +315,7 @@ foreach num of numlist 1(1)`nO' {
 	
 	// one tail
 	gen		ipmeandiff_one = 1
-	replace ipmeandiff_one = 0 if pmeandiff < testonesidedp[`num',1] 
+	replace ipmeandiff_one = 0 if pmeandiff < testonesidedp[`num',6] 
 	summ ipmeandiff_one
 	matrix sd`num'ot = r(mean)
 	matrix colnames sd`num'ot = sdot
@@ -312,33 +328,42 @@ matrix sdot = sdot[2...,1...]
 restore
 
 // from test merge meandiff and naive pvals
+//[AH: I think this just puts test into data and could be done before, but gen on is necessary]
 preserve
 clear
-svmat test
-keep test1-test3
+svmat test, names(col)
 gen on = _n
-rename test1 meandiff
-rename test2 naiveonetail
-rename test3 naivetwotail
 tempfile test
 save "`test'", replace
 restore
-
+*use "`test'", clear
+*use `test', clear
+*asd
 
 // from testonesidedp merge one tail permutation and sd
+// columns to keep: on sd2
 preserve 
 clear
 matrix testonesidedp = [testonesidedp,sdot]
 svmat testonesidedp 
+/*
 keep testonesidedp4 testonesidedp6 testonesidedp7
 rename testonesidedp4 permonetail
 rename testonesidedp6 on
 rename testonesidedp7 peronetailsd
+*/
+//AH: trying with this:
+keep testonesidedp10 testonesidedp11 
+rename testonesidedp10 on
+rename testonesidedp11 peronetailsd
+
+//AH: this was from before: 
 tempfile testoneper
 save "`testoneper'", replace
 restore
 
 // from testtwosidedp merge one tail permutation and sd
+// columns to keep: perm2 on sd2
 preserve 
 clear
 matrix testtwosidedp = [testtwosidedp,sdtt]
@@ -354,8 +379,8 @@ restore
 // generate table with all the p-values
 preserve
 use "`test'", clear
-
 merge 1:1 on using "`testoneper'"
+
 tab _merge
 drop if _merge != 3
 drop _merge
@@ -365,8 +390,14 @@ drop if _merge != 3
 drop _merge on
 aorder
 mkmat *, mat(testfmatrix)
-
+matrix list testfmatrix
+asd
+global edulabel   `"`"Years High School "' "' `"`"Years Community college "' "'  `"`"Years High School "' "' `"`"Years Community college "' "'  `"`"Years High School "' "' 
+macro list
+di `" $edulabel "'
 di `" $ylabel "'
+matrix rownames testfmatrix =  `" $edulabel "'
+matrix list testfmatrix
 matrix rownames testfmatrix =  `" $ylabel "'
 matrix list testfmatrix
 restore
