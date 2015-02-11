@@ -1,3 +1,8 @@
+version 13.0
+set more off
+clear all
+set matsize 11000
+
 /*
 
 Project    : Resources, Small Sample Inference (Permutation Based)
@@ -76,26 +81,27 @@ global x x
 // declare outcomes
 global y $y
 
-*This section creates automatic labels for the rows (variables) based on original labels
-*Careful: STATA matrices can only have 26 characters as rownames (including spaces)
+// this section creates automatic labels for the rows (variables) based on original labels
+// careful: STATA matrices can only have 26 characters as rownames (including spaces)
 
 local labels `" a "'
 foreach var in $y{
 local l`var' : variable label `var'
 local l`var' `"`"`"`l`var''"' "'"'    // careful with modifying this! A space can make a difference
 local labels `labels' `l`var''
-di `" `labels' "' //just to check everything is going well
+di `" `labels' "'                     //just to check everything is going well
 }
 local labels: subinstr local labels `"a"' `""'
 di `" `labels' "' //just to check everything is going well
 global ylabel  `labels' 
 
 // declare labels for outcomes only if you are not using the automatic labels
-*# delimit
-*global ylabel  ;
-*# delimit cr;
+// # delimit
+// global ylabel  ;
+// # delimit cr;
 
-*Reverse: this will change the one-sided tests later. Put here a list of "socially bad" variables
+// reverse: this will change the one-sided tests later. Put here a list of "socially bad" variables
+
 foreach var in {
 local `var'reverse 1
 }
@@ -103,17 +109,11 @@ local `var'reverse 1
 // set number of resamples
 local B = 10
 
-* - - - - - - - - - - - - 
+
 local nO: word count $y
 // reverse and clean the outcome variable for x
 foreach var of varlist $y $z {
-	// reg `var' $z [iw=$w]
-	// matrix b`var' = e(b)
-	// local b`var' = b`var'[1,1]
-	// gen reverse`var' = 1
-	// replace reverse`var' = -1 if `b`var'' < 0
-	// replace `var' = `var'*reverse`var'
-	reg `var' $x //[iw=$w]
+	reg `var' $x [iw=$w]
 	predict `var'_cres, resid
 }
 
@@ -152,7 +152,7 @@ matrix test = J(1,5,.)
 matrix colnames test = diff naive1 naive2 perm1 perm2
 
 foreach var of varlist $y { 
-	reg `var'_cres z_0 //[iw=$w]
+	reg `var'_cres z_0 [iw=$w]
 	matrix b = e(b)
 	local meandiff`var'  = b[1,1]
 	di "`meandiff`var''"
@@ -174,7 +174,7 @@ foreach var of varlist $y {
 	matrix pmeandiff`var' = [.]
 	matrix colnames pmeandiff`var' = meandiff
 	foreach num of numlist 1(1)`B'{
-		reg `var'_cres z_`num' //[iw=$w]
+		reg `var'_cres z_`num' [iw=$w]
 		matrix b = e(b)
 		local  meandiff_`num'  = b[1,1]
 		matrix p`num'`var' = [`meandiff_`num'']
@@ -375,7 +375,7 @@ restore
 matrix testfmatrix = testfmatrix[1...,1..5]
 
 outtable using "yourtableintext", ///
- mat(testfmatrix) replace nobox center f(%9.3f)
+mat(testfmatrix) replace nobox center f(%9.3f)
 
 
 // go back to initial data
