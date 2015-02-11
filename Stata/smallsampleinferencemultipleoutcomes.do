@@ -374,9 +374,10 @@ restore
 // output matrix
 matrix testfmatrix = testfmatrix[1...,1..5]
 
+/*
 outtable using "yourtableintext", ///
 mat(testfmatrix) replace nobox center f(%9.3f)
-
+*/
 
 // go back to initial data
 drop *_cres
